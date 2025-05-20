@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+	<AddIn Type="Application">
+		<Name>Template Plugin</Name>
+		<Assembly>RealRevitPlugin\RealRevitPlugin.dll</Assembly>
+		<AddInId>83A1D773-7A33-4F6A-97A8-DB6E08AB1F0F</AddInId>
+		<FullClassName>RealRevitPlugin.App</FullClassName>
+		<VendorId>Development</VendorId>
+		<VendorDescription>Insert description here</VendorDescription>
+		<VendorEmail>youremail@example.com</VendorEmail>
+	</AddIn>
+</RevitAddIns>
