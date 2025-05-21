@@ -17,7 +17,7 @@ namespace RealRevitPlugin {
         //Create custom ribbon example:
         private void CreateRibbon(UIControlledApplication application)
         {
-            var panel = application.CreatePanel("Commands", "RevitAddIn1");
+            var panel = application.CreatePanel("RealRevitPlugin", "Create Window");
 
             panel.AddPushButton<Command1>("Execute")
                 .SetImage("TestIcon.png")
