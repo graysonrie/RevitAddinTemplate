@@ -88,9 +88,6 @@
     <Compile Include="WpfWindow\WebWindowHandler.cs" />
     <None Include="packages.config" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WpfWindow\ApplicationLogic\Controls\ChromeButton.xaml.cs">
-      <DependentUpon>ChromeButton.xaml</DependentUpon>
-    </Compile>
     <Compile Include="WpfWindow\ApplicationLogic\RevitWindow.xaml.cs">
       <DependentUpon>RevitWindow.xaml</DependentUpon>
     </Compile>
@@ -100,10 +97,6 @@
     <None Include="RealRevitPlugin.addin" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="WpfWindow\ApplicationLogic\Controls\ChromeButton.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="WpfWindow\ApplicationLogic\RevitWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

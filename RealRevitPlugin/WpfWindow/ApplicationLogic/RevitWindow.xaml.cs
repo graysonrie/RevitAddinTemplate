@@ -16,8 +16,7 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
         private readonly WebWindowHandler _webWindowHandler;
         private readonly RevitEventCaller _eventCaller;
 
-        public RevitWindow()
-        {
+        public RevitWindow(){
             _webWindowHandler = new WebWindowHandler(new WebWindowConfig());
 
             InitializeComponent();
@@ -25,8 +24,7 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
             Dispatcher.InvokeAsync(async ()=> {
                 await _webWindowHandler.StartLocalServer(Webview);
             });
-            Webview.CoreWebView2InitializationCompleted += (s, e) =>
-            {
+            Webview.CoreWebView2InitializationCompleted += (s, e) =>{
                 if (!e.IsSuccess) {
                     TaskDialog.Show("WebView2 Init Failed", e.InitializationException?.Message);
                 }
@@ -36,8 +34,7 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
         }
 
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
+        private void Button_Click(object sender, RoutedEventArgs e){
             _eventCaller.Execute((uiapp) =>
             {
                 try
@@ -65,7 +62,7 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
                     TaskDialog.Show("View Types",
                         string.Join("\n", viewTypes.Select(vt => vt.ToString())));
                 }
-                catch (System.Exception ex)
+                catch (Exception ex)
                 {
                     TaskDialog.Show("Error", $"An error occurred: {ex.Message}");
                 }
