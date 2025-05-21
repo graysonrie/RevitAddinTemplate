@@ -3,6 +3,7 @@ using Autodesk.Revit.UI;
 using System.Windows;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace RealRevitPlugin.WpfWindow.ApplicationLogic
 {
@@ -11,9 +12,14 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
     /// </summary>
     public partial class RevitWindow : Window
     {
+        private readonly WebWindowHandler _webWindowHandler;
         public RevitWindow()
         {
+            _webWindowHandler = new WebWindowHandler(new WebWindowConfig());
+
             InitializeComponent();
+            _webWindowHandler.StartLocalServer(Webview);
+            TaskDialog.Show("Webview", $"Serving from {_webWindowHandler.Config.WebRootPath}");
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -40,6 +46,10 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
                 TaskDialog.Show("View Types",
                     string.Join("\n", viewTypes.Select(vt => vt.ToString())));
             });
+        }
+        protected override void OnClosed(EventArgs e) {
+            _webWindowHandler?.Dispose(); // Gracefully shut down the server
+            base.OnClosed(e);
         }
     }
 }
