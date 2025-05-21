@@ -4,6 +4,7 @@ using System.Windows;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Windows.Input;
 
 namespace RealRevitPlugin.WpfWindow.ApplicationLogic
 {
@@ -13,11 +14,14 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
     public partial class RevitWindow : Window
     {
         private readonly WebWindowHandler _webWindowHandler;
+        private readonly RevitEventCaller _eventCaller;
+
         public RevitWindow()
         {
             _webWindowHandler = new WebWindowHandler(new WebWindowConfig());
 
             InitializeComponent();
+
             Dispatcher.InvokeAsync(async ()=> {
                 await _webWindowHandler.StartLocalServer(Webview);
             });
@@ -27,36 +31,50 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
                     TaskDialog.Show("WebView2 Init Failed", e.InitializationException?.Message);
                 }
             };
+
+            _eventCaller = new RevitEventCaller();
         }
 
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            RevitContext.Events.Execute(uiapp =>
+            _eventCaller.Execute((uiapp) =>
             {
-                UIDocument uidoc = uiapp.ActiveUIDocument;
-                Document doc = uidoc.Document;
+                try
+                {
+                    UIDocument uidoc = uiapp.ActiveUIDocument;
+                    if (uidoc?.Document == null) return;
 
-                // Collect all views in the project
-                var collector = new FilteredElementCollector(doc)
-                    .OfClass(typeof(View))
-                    .Cast<View>()
-                    .Where(v => !v.IsTemplate) // Exclude view templates
-                    .ToList();
+                    Document doc = uidoc.Document;
 
-                // Get distinct view types
-                HashSet<ViewType> viewTypes = new HashSet<ViewType>();
-                foreach (View view in collector){
-                    viewTypes.Add(view.ViewType);
+                    // Collect all views in the project
+                    var collector = new FilteredElementCollector(doc)
+                        .OfClass(typeof(View))
+                        .Cast<View>()
+                        .Where(v => v != null && !v.IsTemplate)
+                        .ToList();
+
+                    // Get distinct view types
+                    HashSet<ViewType> viewTypes = new HashSet<ViewType>();
+                    foreach (View view in collector)
+                    {
+                        viewTypes.Add(view.ViewType);
+                    }
+
+                    // Output or use the view types
+                    TaskDialog.Show("View Types",
+                        string.Join("\n", viewTypes.Select(vt => vt.ToString())));
                 }
-
-                // Output or use the view types
-                TaskDialog.Show("View Types",
-                    string.Join("\n", viewTypes.Select(vt => vt.ToString())));
+                catch (System.Exception ex)
+                {
+                    TaskDialog.Show("Error", $"An error occurred: {ex.Message}");
+                }
             });
         }
+
         protected override void OnClosed(EventArgs e) {
             _webWindowHandler?.Dispose(); // Gracefully shut down the server
+            _eventCaller?.Dispose();
             base.OnClosed(e);
         }
     }
