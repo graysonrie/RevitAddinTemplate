@@ -18,9 +18,17 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
             _webWindowHandler = new WebWindowHandler(new WebWindowConfig());
 
             InitializeComponent();
-            _webWindowHandler.StartLocalServer(Webview);
-            TaskDialog.Show("Webview", $"Serving from {_webWindowHandler.Config.WebRootPath}");
+            Dispatcher.InvokeAsync(async ()=> {
+                await _webWindowHandler.StartLocalServer(Webview);
+            });
+            Webview.CoreWebView2InitializationCompleted += (s, e) =>
+            {
+                if (!e.IsSuccess) {
+                    TaskDialog.Show("WebView2 Init Failed", e.InitializationException?.Message);
+                }
+            };
         }
+
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {

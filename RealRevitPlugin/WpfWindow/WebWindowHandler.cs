@@ -1,7 +1,10 @@
-﻿using EmbedIO;
+﻿using Autodesk.Revit.UI;
+using EmbedIO;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace RealRevitPlugin.WpfWindow {
     public class WebWindowHandler : IDisposable {
@@ -11,14 +14,24 @@ namespace RealRevitPlugin.WpfWindow {
             Config = config;
         }
 
-        public void StartLocalServer(WebView2 webview) {
+        public async Task StartLocalServer(WebView2 webview) {
             _server = new WebServer(o => o
                     .WithUrlPrefix($"http://localhost:{Config.Port}/")
                     .WithMode(HttpListenerMode.EmbedIO))
                 .WithLocalSessionManager()
                 .WithStaticFolder("/", Config.WebRootPath, true);
 
-            _server.RunAsync(); // Runs in background
+            _server.RunAsync(); // Run server in background
+
+            // Use a custom data path to avoid permission issues in Revit
+            string name = RevitContext.AddinName;
+            string safeDataPath = Path.Combine(Path.GetTempPath(), $"{name}_RevitWebView2");
+            Directory.CreateDirectory(safeDataPath); // Ensure it exists
+
+            // Wait for WebView2 to initialize
+            var env = await CoreWebView2Environment.CreateAsync(userDataFolder: safeDataPath);
+            await webview.EnsureCoreWebView2Async(env);
+
             webview.Source = new Uri($"http://localhost:{Config.Port}/index.html");
         }
 
