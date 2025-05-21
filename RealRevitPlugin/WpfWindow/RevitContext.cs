@@ -9,6 +9,12 @@ namespace RealRevitPlugin.WpfWindow {
         private static bool _setupComplete = false;
         private static readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
 
+        public static string AddinName {
+            get {
+                return System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;            
+            }
+        }
+
         public static RevitEventCaller Events {
             get {
                 return Resolve<RevitEventCaller>();

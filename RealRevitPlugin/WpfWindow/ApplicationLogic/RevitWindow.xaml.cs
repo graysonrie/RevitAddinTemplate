@@ -3,6 +3,7 @@ using Autodesk.Revit.UI;
 using System.Windows;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using System.Windows.Input;
 
 namespace RealRevitPlugin.WpfWindow.ApplicationLogic
@@ -12,25 +13,28 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
     /// </summary>
     public partial class RevitWindow : Window
     {
+        private readonly WebWindowHandler _webWindowHandler;
         private readonly RevitEventCaller _eventCaller;
 
         public RevitWindow()
         {
+            _webWindowHandler = new WebWindowHandler(new WebWindowConfig());
+
             InitializeComponent();
+
+            Dispatcher.InvokeAsync(async ()=> {
+                await _webWindowHandler.StartLocalServer(Webview);
+            });
+            Webview.CoreWebView2InitializationCompleted += (s, e) =>
+            {
+                if (!e.IsSuccess) {
+                    TaskDialog.Show("WebView2 Init Failed", e.InitializationException?.Message);
+                }
+            };
+
             _eventCaller = new RevitEventCaller();
         }
 
-        private void OnTitleBarMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ClickCount == 2)
-            {
-                WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-            }
-            else
-            {
-                DragMove();
-            }
-        }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -68,16 +72,10 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
             });
         }
 
-        protected override void OnSourceInitialized(System.EventArgs e)
-        {
-            base.OnSourceInitialized(e);
-            this.MaxHeight = SystemParameters.MaximizedPrimaryScreenHeight;
-        }
-
-        protected override void OnClosed(System.EventArgs e)
-        {
-            base.OnClosed(e);
+        protected override void OnClosed(EventArgs e) {
+            _webWindowHandler?.Dispose(); // Gracefully shut down the server
             _eventCaller?.Dispose();
+            base.OnClosed(e);
         }
     }
 }
