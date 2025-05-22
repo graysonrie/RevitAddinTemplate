@@ -39,7 +39,7 @@ namespace RealRevitPlugin.WpfWindow.Web.Core {
 
             // Wait for WebView2 to initialize
             var env = await CoreWebView2Environment.CreateAsync(userDataFolder: safeDataPath);
-            //await webview.EnsureCoreWebView2Async(env);
+            await webview.EnsureCoreWebView2Async(env);
 
             webview.Source = new Uri($"http://localhost:{Config.Port}/index.html");
         }
