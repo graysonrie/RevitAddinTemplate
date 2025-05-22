@@ -15,9 +15,9 @@ namespace RealRevitPlugin.WpfWindow {
             }
         }
 
-        public static RevitEventCaller Events {
+        public static RevitEventCaller2 Events {
             get {
-                return Resolve<RevitEventCaller>();
+                return Resolve<RevitEventCaller2>();
             }
         }
 
@@ -45,8 +45,8 @@ namespace RealRevitPlugin.WpfWindow {
         /// </summary>
         public static void Setup() {
             if(_setupComplete) return;
-            if (Resolve<RevitEventCaller>() == null) {
-                var eventCaller = new RevitEventCaller();
+            if (Resolve<RevitEventCaller2>() == null) {
+                var eventCaller = new RevitEventCaller2();
                 Register(eventCaller);
             }
             _setupComplete = true;

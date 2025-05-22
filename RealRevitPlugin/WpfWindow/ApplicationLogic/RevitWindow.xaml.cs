@@ -23,10 +23,6 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
 
             InitializeComponent();
 
-            var webviewLocation = typeof(Microsoft.Web.WebView2.Wpf.WebView2).Assembly.Location;
-
-            TaskDialog.Show(webviewLocation, webviewLocation);
-
             _webCommands.RegisterCommand("GetViews", async () =>
             {
                 return await _eventCaller.Execute(uiapp =>

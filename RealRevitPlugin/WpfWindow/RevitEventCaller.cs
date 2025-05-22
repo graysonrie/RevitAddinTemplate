@@ -20,6 +20,8 @@ namespace RealRevitPlugin.WpfWindow
             _externalEvent = ExternalEvent.Create(_handler);
         }
 
+
+
         public Task<T> Execute<T>(Func<UIApplication, T> action)
         {
             if (_disposed) throw new ObjectDisposedException(nameof(RevitEventCaller));
