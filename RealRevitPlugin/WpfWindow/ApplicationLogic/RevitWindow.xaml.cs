@@ -23,7 +23,7 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
 
             InitializeComponent();
 
-            _webCommands.RegisterCommand("GetViews", async () =>
+            _webCommands.RegisterAsyncCommand("GetViews", async () =>
             {
                 return await _eventCaller.Execute(uiapp =>
                 {
@@ -41,6 +41,10 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
 
                     return views.Select(vt => vt.ToString()).ToList();
                 });
+            });
+
+            _webCommands.RegisterCommand("Test", () => {
+                return "Test command executed!";
             });
 
             _webCommands.StartLocalServer(Dispatcher, Webview);

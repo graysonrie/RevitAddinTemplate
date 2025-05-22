@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Text.Json.Serialization;
-using System.Text.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using RealRevitPlugin.WpfWindow.Web.Core.WebEvents;
 using RealRevitPlugin.WpfWindow.Web.Core;
 using System.Windows.Threading;
@@ -18,17 +18,17 @@ namespace RealRevitPlugin.WpfWindow.Web
         private readonly WebWindowHandler _windowHandler;
 
         public WebWindowConfig Config { get; private set; }
-        public WebCommands(WebWindowConfig config = null, JsonSerializerOptions jsonOptions = null)
+        public WebCommands(WebWindowConfig config = null, JsonSerializerSettings jsonSettings = null)
         {
-            jsonOptions = jsonOptions ?? new JsonSerializerOptions()
+            jsonSettings = jsonSettings ?? new JsonSerializerSettings()
             {
-                PropertyNameCaseInsensitive = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                Converters = { new JsonStringEnumConverter() }
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.None,
+                Converters = { new StringEnumConverter() }
             };
 
             Config = config ?? new WebWindowConfig();
-            _commandRegistry = new CommandRegistry(jsonOptions);
+            _commandRegistry = new CommandRegistry(jsonSettings);
             _windowHandler = new WebWindowHandler(Config, _commandRegistry);
         }
         /// <summary>
@@ -74,10 +74,8 @@ namespace RealRevitPlugin.WpfWindow.Web
                 return new Result<TResponse>(output);
             });
         }
-        public void RegisterCommand<TArgs, TResponse>(string commandName, Func<TArgs, TResponse> func) where TArgs : class where TResponse : class
-        {
-            _commandRegistry.RegisterCommand<TArgs, TResponse>(commandName, async (args) =>
-            {
+        public void RegisterCommand<TArgs, TResponse>(string commandName, Func<TArgs, TResponse> func) where TArgs : class where TResponse : class {
+            _commandRegistry.RegisterCommand<TArgs, TResponse>(commandName, async (args) => {
                 var output = await Task.Run(() => func(args));
                 return new Result<TResponse>(output);
             });
@@ -91,10 +89,8 @@ namespace RealRevitPlugin.WpfWindow.Web
                 return new Result<TResponse>(output);
             });
         }
-        public void RegisterCommand<TResponse>(string commandName, Func<TResponse> func) where TResponse : class
-        {
-            _commandRegistry.RegisterCommand<object, TResponse>(commandName, async (args) =>
-            {
+        public void RegisterCommand<TResponse>(string commandName, Func<TResponse> func) where TResponse : class {
+            _commandRegistry.RegisterCommand<object, TResponse>(commandName, async (args) => {
                 var output = await Task.Run(() => func());
                 return new Result<TResponse>(output);
             });

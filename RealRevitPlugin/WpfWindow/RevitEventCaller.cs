@@ -8,38 +8,36 @@ namespace RealRevitPlugin.WpfWindow
     /// <summary>
     /// Do not instantiate this class other than in the RevitContext. Instead, use <c>RevitContext.Events</c> if you want to perform Revit actions
     /// </summary>
-    public class RevitEventCaller : IDisposable
-    {
+    public class RevitEventCaller : IDisposable {
         private readonly RevitEventHandler _handler;
         private readonly ExternalEvent _externalEvent;
         private bool _disposed;
 
-        public RevitEventCaller()
-        {
+        public RevitEventCaller() {
             _handler = new RevitEventHandler();
             _externalEvent = ExternalEvent.Create(_handler);
         }
 
-
-
-        public Task<T> Execute<T>(Func<UIApplication, T> action)
-        {
+        public Task<T> Execute<T>(Func<UIApplication, T> func) {
             if (_disposed) throw new ObjectDisposedException(nameof(RevitEventCaller));
 
             var tcs = new TaskCompletionSource<T>();
-            var wrapper = new ActionWrapper<T>
+            _handler.Enqueue(app =>
             {
-                Action = action,
-                CompletionSource = tcs
-            };
+                try {
+                    var result = func(app);
+                    tcs.SetResult(result);
+                }
+                catch (Exception ex) {
+                    tcs.SetException(ex);
+                }
+            });
 
-            _handler.Enqueue(wrapper);
             _externalEvent.Raise();
             return tcs.Task;
         }
 
-        public Task Execute(Action<UIApplication> action)
-        {
+        public Task Execute(Action<UIApplication> action) {
             return Execute<object>(app =>
             {
                 action(app);
@@ -47,66 +45,34 @@ namespace RealRevitPlugin.WpfWindow
             });
         }
 
-        public void Dispose()
-        {
+        public void Dispose() {
             if (_disposed) return;
-            _externalEvent?.Dispose();
+            _externalEvent.Dispose();
             _disposed = true;
         }
 
-        private class ActionWrapper<T>
-        {
-            public Func<UIApplication, T> Action { get; set; }
-            public TaskCompletionSource<T> CompletionSource { get; set; }
-        }
-
-        private class RevitEventHandler : IExternalEventHandler
-        {
-            private readonly Queue<object> _actions = new Queue<object>();
+        private class RevitEventHandler : IExternalEventHandler {
+            private readonly Queue<Action<UIApplication>> _actions = new Queue<Action<UIApplication>>();
             private readonly object _lock = new object();
 
-            public void Enqueue<T>(ActionWrapper<T> wrapper)
-            {
-                lock (_lock)
-                {
-                    _actions.Enqueue(wrapper);
+            public void Enqueue(Action<UIApplication> action) {
+                lock (_lock) {
+                    _actions.Enqueue(action);
                 }
             }
 
-            public void Execute(UIApplication app)
-            {
-                object wrapper = null;
-                lock (_lock)
-                {
+            public void Execute(UIApplication app) {
+                Action<UIApplication> action = null;
+                lock (_lock) {
                     if (_actions.Count > 0)
-                        wrapper = _actions.Dequeue();
+                        action = _actions.Dequeue();
                 }
 
-                if (wrapper == null) return;
-
-                try
-                {
-                    var type = wrapper.GetType();
-                    var actionProperty = type.GetProperty("Action");
-                    var completionSourceProperty = type.GetProperty("CompletionSource");
-
-                    if (actionProperty?.GetValue(wrapper) is Func<UIApplication, object> action &&
-                        completionSourceProperty?.GetValue(wrapper) is TaskCompletionSource<object> tcs)
-                    {
-                        var result = action(app);
-                        tcs.TrySetResult(result);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    if (wrapper is ActionWrapper<object> objWrapper)
-                    {
-                        objWrapper.CompletionSource.TrySetException(ex);
-                    }
-                }
+                action?.Invoke(app);
             }
 
-            public string GetName() => "Queued Revit Event Handler";
+            public string GetName() => "Safe Revit Event Handler";
         }
     }
+
 }
