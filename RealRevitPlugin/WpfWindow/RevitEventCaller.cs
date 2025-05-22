@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RealRevitPlugin.WpfWindow
 {
@@ -17,24 +18,40 @@ namespace RealRevitPlugin.WpfWindow
             _externalEvent = ExternalEvent.Create(_handler);
         }
 
-        public void Execute(Action<UIApplication> action) {
+        public Task<T> Execute<T>(Func<UIApplication, T> func) {
             if (_disposed) throw new ObjectDisposedException(nameof(RevitEventCaller));
 
-            _handler.Enqueue(action);
+            var tcs = new TaskCompletionSource<T>();
+            _handler.Enqueue(app =>
+            {
+                try {
+                    var result = func(app);
+                    tcs.SetResult(result);
+                }
+                catch (Exception ex) {
+                    tcs.SetException(ex);
+                }
+            });
+
             _externalEvent.Raise();
+            return tcs.Task;
+        }
+
+        public Task Execute(Action<UIApplication> action) {
+            return Execute<object>(app =>
+            {
+                action(app);
+                return null;
+            });
         }
 
         public void Dispose() {
             if (_disposed) return;
-            _externalEvent?.Dispose();
+            _externalEvent.Dispose();
             _disposed = true;
         }
 
-        public class RevitEvent {
-            public RevitEventHandler Handler { get; set; }
-            public ExternalEvent ExternalEvent { get; set; }
-        }
-        public class RevitEventHandler : IExternalEventHandler {
+        private class RevitEventHandler : IExternalEventHandler {
             private readonly Queue<Action<UIApplication>> _actions = new Queue<Action<UIApplication>>();
             private readonly object _lock = new object();
 
@@ -46,7 +63,6 @@ namespace RealRevitPlugin.WpfWindow
 
             public void Execute(UIApplication app) {
                 Action<UIApplication> action = null;
-
                 lock (_lock) {
                     if (_actions.Count > 0)
                         action = _actions.Dequeue();
@@ -55,7 +71,8 @@ namespace RealRevitPlugin.WpfWindow
                 action?.Invoke(app);
             }
 
-            public string GetName() => "Queued Revit Event Handler";
+            public string GetName() => "Safe Revit Event Handler";
         }
     }
+
 }

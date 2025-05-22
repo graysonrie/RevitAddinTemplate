@@ -2,16 +2,23 @@
 using EmbedIO;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
+using RealRevitPlugin.WpfWindow.Web.Core.WebEvents;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace RealRevitPlugin.WpfWindow {
+namespace RealRevitPlugin.WpfWindow.Web.Core {
     public class WebWindowHandler : IDisposable {
+        private readonly WebEventsHandler _eventsHandler;
+
+        /// <summary>
+        /// The EmbedIO web server instance.
+        /// </summary>
         private WebServer _server;
         public WebWindowConfig Config { get; private set; }
-        public WebWindowHandler(WebWindowConfig config) {
+        public WebWindowHandler(WebWindowConfig config, CommandRegistry commandRegistry) {
             Config = config;
+            _eventsHandler = new WebEventsHandler(commandRegistry);
         }
 
         public async Task StartLocalServer(WebView2 webview) {
@@ -27,6 +34,8 @@ namespace RealRevitPlugin.WpfWindow {
             string name = RevitContext.AddinName;
             string safeDataPath = Path.Combine(Path.GetTempPath(), $"{name}_RevitWebView2");
             Directory.CreateDirectory(safeDataPath); // Ensure it exists
+
+            _eventsHandler.HandleWebviewEvents(webview);
 
             // Wait for WebView2 to initialize
             var env = await CoreWebView2Environment.CreateAsync(userDataFolder: safeDataPath);
@@ -47,16 +56,6 @@ namespace RealRevitPlugin.WpfWindow {
                 _server = null;
             }
             GC.SuppressFinalize(this);
-        }
-    }
-    public class WebWindowConfig {
-        public int Port { get; private set; } = 3000;
-        public string WebRootPath { get; private set; }
-        public WebWindowConfig(int port = 3000, string webRootPath = null) {
-            Port = port;
-            string assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string assemblyDir = Path.GetDirectoryName(assemblyPath);
-            WebRootPath = webRootPath ?? Path.Combine(assemblyDir, "web");
         }
     }
 }
