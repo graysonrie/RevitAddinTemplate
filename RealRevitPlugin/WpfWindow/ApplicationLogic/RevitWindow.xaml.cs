@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using RealRevitPlugin.WpfWindow.Web;
+using RealRevitPlugin.WpfWindow.Web.Core;
 
 namespace RealRevitPlugin.WpfWindow.ApplicationLogic
 {
@@ -18,7 +19,8 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
 
         public RevitWindow()
         {
-            _webCommands = new WebCommands();
+            WebWindowConfig config = new(runLocally: false);
+            _webCommands = new WebCommands(config);
             _eventCaller = new RevitEventCaller();
 
             InitializeComponent();

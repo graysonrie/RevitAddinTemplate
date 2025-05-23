@@ -11,21 +11,24 @@ using Swan;
 namespace RealRevitPlugin
 {
     [Transaction(TransactionMode.Manual)]
-    public class Command1 : IExternalCommand {
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements) {
+    public class Command1 : IExternalCommand
+    {
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
             RevitContext.Setup();
 
             //Get application and document objects  
             UIApplication uiapp = commandData.Application;
             Document doc = uiapp.ActiveUIDocument.Document;
 
-            GetViewsAndApplyHalftones(doc);
+            // GetViewsAndApplyHalftones(doc);
 
-            // RevitWindowSpawner.Spawn();
+            RevitWindowSpawner.Spawn();
 
             return Result.Succeeded;
         }
-        public void GetViewsAndApplyHalftones(Document doc) {
+        public void GetViewsAndApplyHalftones(Document doc)
+        {
             // Collect all views in the project
             var views = new FilteredElementCollector(doc)
                 .OfClass(typeof(View))
@@ -33,7 +36,8 @@ namespace RealRevitPlugin
                 .Where(v => v != null && !v.IsTemplate)
                 .ToList();
 
-            var viewTemplates = views.Select(x => {
+            var viewTemplates = views.Select(x =>
+            {
                 var template = x.ViewTemplateId;
                 if (template == ElementId.InvalidElementId) return null;
                 return doc.GetElement(template) as View;
@@ -45,51 +49,51 @@ namespace RealRevitPlugin
             HalftoneAllViews(doc);
             //TaskDialog.Show("Views", string.Join("\n", names));
         }
-        public void HalftoneAllViews(Document doc) {
-            BuiltInCategory[] targetCategories = new BuiltInCategory[]
-            {
+        public void HalftoneAllViews(Document doc)
+        {
+            BuiltInCategory[] targetCategories =
+            [
                 BuiltInCategory.OST_RvtLinks,
-            };
+            ];
 
             FilteredElementCollector viewCollector = new FilteredElementCollector(doc)
                 .OfClass(typeof(View)).WhereElementIsNotElementType();
 
             var views = viewCollector.Where(x => x.Name.Contains("Level"));
 
-            using (Transaction tx = new Transaction(doc, "Halftone All Views")) {
-                tx.Start();
+            using Transaction tx = new(doc, "Halftone All Views");
+            tx.Start();
 
-                List<string> elements = new List<string>();
-                int applied = 0;
-                foreach (View view in views.Cast<View>())
-                {
-                    applied++;
-                    if (view.IsTemplate || !view.CanBePrinted) continue;
+            List<string> elements = [];
+            int applied = 0;
+            foreach (View view in views.Cast<View>())
+            {
+                applied++;
+                if (view.IsTemplate || !view.CanBePrinted) continue;
 
-                    var collector = new FilteredElementCollector(doc, view.Id)
-                        .WhereElementIsNotElementType()
-                        .Where(e =>
-                        {
-                            Category cat = e.Category;
-                            if (cat == null) return false;
-
-                            var parsed = Enum.TryParse(cat.Id.Value.ToString(), out BuiltInCategory bic);
-                            elements.Add(bic.ToString());
-                            return parsed && targetCategories.Contains(bic);
-                        });
-
-                    foreach (Element element in collector)
+                var collector = new FilteredElementCollector(doc, view.Id)
+                    .WhereElementIsNotElementType()
+                    .Where(e =>
                     {
-                        OverrideGraphicSettings ogs = new OverrideGraphicSettings();
-                        ogs.SetHalftone(true);
-                        view.SetElementOverrides(element.Id, ogs);
-                    }
-                }
-                //TaskDialog.Show("Halftone", $"Applying halftone to {applied} views.");
-                TaskDialog.Show("Elements", string.Join("\n", elements.Distinct()));
+                        Category cat = e.Category;
+                        if (cat == null) return false;
 
-                tx.Commit();
+                        var parsed = Enum.TryParse(cat.Id.Value.ToString(), out BuiltInCategory bic);
+                        elements.Add(bic.ToString());
+                        return parsed && targetCategories.Contains(bic);
+                    });
+
+                foreach (Element element in collector)
+                {
+                    OverrideGraphicSettings ogs = new OverrideGraphicSettings();
+                    ogs.SetHalftone(true);
+                    view.SetElementOverrides(element.Id, ogs);
+                }
             }
+            //TaskDialog.Show("Halftone", $"Applying halftone to {applied} views.");
+            TaskDialog.Show("Elements", string.Join("\n", elements.Distinct()));
+
+            tx.Commit();
         }
 
     }

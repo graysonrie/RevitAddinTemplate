@@ -3,8 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace RealRevitPlugin.WpfWindow
-{
+namespace RealRevitPlugin.WpfWindow {
     /// <summary>
     /// Do not instantiate this class other than in the RevitContext. Instead, use <c>RevitContext.Events</c> if you want to perform Revit actions
     /// </summary>
@@ -22,8 +21,7 @@ namespace RealRevitPlugin.WpfWindow
             if (_disposed) throw new ObjectDisposedException(nameof(RevitEventCaller));
 
             var tcs = new TaskCompletionSource<T>();
-            _handler.Enqueue(app =>
-            {
+            _handler.Enqueue(app => {
                 try {
                     var result = func(app);
                     tcs.SetResult(result);
@@ -38,8 +36,9 @@ namespace RealRevitPlugin.WpfWindow
         }
 
         public Task Execute(Action<UIApplication> action) {
-            return Execute<object>(app =>
-            {
+            if (_disposed) throw new ObjectDisposedException(nameof(RevitEventCaller));
+
+            return Execute<object?>(app => {
                 action(app);
                 return null;
             });
@@ -62,7 +61,7 @@ namespace RealRevitPlugin.WpfWindow
             }
 
             public void Execute(UIApplication app) {
-                Action<UIApplication> action = null;
+                Action<UIApplication>? action = null;
                 lock (_lock) {
                     if (_actions.Count > 0)
                         action = _actions.Dequeue();

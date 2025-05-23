@@ -11,13 +11,13 @@ namespace RealRevitPlugin.WpfWindow {
 
         public static string AddinName {
             get {
-                return System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;            
+                return System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
             }
         }
 
         public static RevitEventCaller Events {
             get {
-                return Resolve<RevitEventCaller>();
+                return Resolve<RevitEventCaller>() ?? throw new InvalidOperationException("RevitEventCaller is not registered");
             }
         }
 
@@ -29,7 +29,7 @@ namespace RealRevitPlugin.WpfWindow {
         /// </summary>
         /// <typeparam name="TService"></typeparam>
         /// <returns>null if the service is not registered</returns>
-        private static TService Resolve<TService>() where TService : class {
+        private static TService? Resolve<TService>() where TService : class {
             if (_services.TryGetValue(typeof(TService), out var instance))
                 return instance as TService;
 
@@ -44,7 +44,7 @@ namespace RealRevitPlugin.WpfWindow {
         /// Registers all required services. Does nothing if Setup has already been called
         /// </summary>
         public static void Setup() {
-            if(_setupComplete) return;
+            if (_setupComplete) return;
             if (Resolve<RevitEventCaller>() == null) {
                 var eventCaller = new RevitEventCaller();
                 Register(eventCaller);
