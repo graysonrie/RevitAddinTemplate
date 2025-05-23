@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealRevitPlugin", "RealRevitPlugin\RealRevitPlugin.csproj", "{E1FCF4FB-3B6B-B4AB-2B1B-0F9F093C1A0F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealRevitPlugin", "RealRevitPlugin\RealRevitPlugin.csproj", "{D5CC3EEC-4BC4-4E58-AB06-999680140B79}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,10 +10,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E1FCF4FB-3B6B-B4AB-2B1B-0F9F093C1A0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E1FCF4FB-3B6B-B4AB-2B1B-0F9F093C1A0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E1FCF4FB-3B6B-B4AB-2B1B-0F9F093C1A0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E1FCF4FB-3B6B-B4AB-2B1B-0F9F093C1A0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5CC3EEC-4BC4-4E58-AB06-999680140B79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5CC3EEC-4BC4-4E58-AB06-999680140B79}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5CC3EEC-4BC4-4E58-AB06-999680140B79}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5CC3EEC-4BC4-4E58-AB06-999680140B79}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

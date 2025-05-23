@@ -19,9 +19,9 @@ namespace RealRevitPlugin
             UIApplication uiapp = commandData.Application;
             Document doc = uiapp.ActiveUIDocument.Document;
 
-           // GetViewsAndApplyHalftones(doc);
+            GetViewsAndApplyHalftones(doc);
 
-            RevitWindowSpawner.Spawn();
+            // RevitWindowSpawner.Spawn();
 
             return Result.Succeeded;
         }
@@ -43,9 +43,14 @@ namespace RealRevitPlugin
             List<string> names = viewTemplates.Select(x => x.Name).ToList();
 
             HalftoneAllViews(doc);
-            TaskDialog.Show("Views", string.Join("\n", names));
+            //TaskDialog.Show("Views", string.Join("\n", names));
         }
         public void HalftoneAllViews(Document doc) {
+            BuiltInCategory[] targetCategories = new BuiltInCategory[]
+            {
+                BuiltInCategory.OST_RvtLinks,
+            };
+
             FilteredElementCollector viewCollector = new FilteredElementCollector(doc)
                 .OfClass(typeof(View)).WhereElementIsNotElementType();
 
@@ -54,25 +59,34 @@ namespace RealRevitPlugin
             using (Transaction tx = new Transaction(doc, "Halftone All Views")) {
                 tx.Start();
 
+                List<string> elements = new List<string>();
                 int applied = 0;
-                foreach (View view in views.Cast<View>()) {
+                foreach (View view in views.Cast<View>())
+                {
                     applied++;
-                    // Skip view templates or non-printable views
                     if (view.IsTemplate || !view.CanBePrinted) continue;
 
-                    // Get all visible elements in this view
-                    ICollection<ElementId> elementIds = new FilteredElementCollector(doc, view.Id)
+                    var collector = new FilteredElementCollector(doc, view.Id)
                         .WhereElementIsNotElementType()
-                        .ToElementIds();
+                        .Where(e =>
+                        {
+                            Category cat = e.Category;
+                            if (cat == null) return false;
 
-                    foreach (ElementId id in elementIds) {
+                            var parsed = Enum.TryParse(cat.Id.Value.ToString(), out BuiltInCategory bic);
+                            elements.Add(bic.ToString());
+                            return parsed && targetCategories.Contains(bic);
+                        });
+
+                    foreach (Element element in collector)
+                    {
                         OverrideGraphicSettings ogs = new OverrideGraphicSettings();
                         ogs.SetHalftone(true);
-
-                        view.SetElementOverrides(id, ogs);
+                        view.SetElementOverrides(element.Id, ogs);
                     }
                 }
-                TaskDialog.Show("Halftone", $"Applying halftone to {applied} views.");
+                //TaskDialog.Show("Halftone", $"Applying halftone to {applied} views.");
+                TaskDialog.Show("Elements", string.Join("\n", elements.Distinct()));
 
                 tx.Commit();
             }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace RealRevitPlugin.WpfWindow {
     public class RevitContext {
         private static bool _setupComplete = false;
-        private static readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
+        private static readonly Dictionary<Type, object> _services = [];
 
         public static string AddinName {
             get {
