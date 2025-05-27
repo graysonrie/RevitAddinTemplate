@@ -19,7 +19,7 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
 
         public RevitWindow()
         {
-            WebWindowConfig config = new(runLocally: false);
+            WebWindowConfig config = new();
             _webCommands = new WebCommands(config);
             _eventCaller = new RevitEventCaller();
 
