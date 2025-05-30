@@ -13,7 +13,7 @@ namespace RealRevitPlugin
 {
     public class RevitWindowSpawner
     {
-        private static RevitWindow _window;
+        private static RevitWindow? _window;
         /// <summary>
         ///  Creates an instance of the custom window. If the window is already open, it will bring it to the front.
         /// </summary>

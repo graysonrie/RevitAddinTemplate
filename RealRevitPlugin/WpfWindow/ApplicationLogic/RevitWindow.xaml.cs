@@ -41,7 +41,7 @@ namespace RealRevitPlugin.WpfWindow.ApplicationLogic
                         .Where(v => v != null && !v.IsTemplate)
                         .ToList();
 
-                    return views.Select(vt => vt.ToString()).ToList();
+                    return views.Select(vt => vt.Name).ToList();
                 });
             });
 

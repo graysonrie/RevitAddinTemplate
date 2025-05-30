@@ -6,11 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace RealRevitPlugin.WpfWindow.Web {
-    public class GlobalStateAccessor {
-        private readonly GlobalState _state;
-        public GlobalStateAccessor(GlobalState state) {
-            _state = state;
-        }
+    public class GlobalStateAccessor(GlobalState state) {
+        private readonly GlobalState _state = state;
+
         public State<T> Get<T>() where T : class {
             return _state.GetState<T>();
         }

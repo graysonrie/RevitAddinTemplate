@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  //output: "export",
+  output: "export",
   assetPrefix: "./", // Use relative path
   trailingSlash: true,
   images: {
