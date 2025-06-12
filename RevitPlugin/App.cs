@@ -1,15 +1,13 @@
 ﻿using Autodesk.Revit.UI;
-using RealRevitPlugin.WpfWindow;
-using RealRevitPlugin.AppUtil;
+using RealRevitPlugin.Extensions;
 
-namespace RealRevitPlugin {
+namespace RevitPlugin {
     public class App : IExternalApplication {
         public Result OnShutdown(UIControlledApplication application) {
             return Result.Succeeded;
         }
 
         public Result OnStartup(UIControlledApplication application) {
-            RevitContext.Setup();
             CreateRibbon(application);
             return Result.Succeeded;
         }
@@ -19,7 +17,7 @@ namespace RealRevitPlugin {
         {
             var panel = application.CreatePanel("HalftoneViews", "HalftoneViews");
 
-            panel.AddPushButton<Command1>("Execute")
+            panel.AddPushButton<HalftoneCommand>("Execute")
                 .SetImage("TestIcon.png")
                 .SetLargeImage("TestIconBig.png");
         }

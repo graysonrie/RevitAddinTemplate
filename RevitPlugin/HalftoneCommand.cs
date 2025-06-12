@@ -1,26 +1,19 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Selection;
-using RealRevitPlugin.WpfWindow;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-using Swan;
 
-namespace RealRevitPlugin {
+namespace RevitPlugin {
     [Transaction(TransactionMode.Manual)]
-    public class Command1 : IExternalCommand {
+    public class HalftoneCommand : IExternalCommand {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements) {
-            RevitContext.Setup();
-
             //Get application and document objects  
             UIApplication uiapp = commandData.Application;
             Document doc = uiapp.ActiveUIDocument.Document;
 
-            //    GetViewsAndApplyHalftones(doc);
-
-            RevitWindowSpawner.Spawn();
+            GetViewsAndApplyHalftones(doc);
 
             return Result.Succeeded;
         }
