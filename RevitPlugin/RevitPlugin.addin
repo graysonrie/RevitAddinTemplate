@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+	<AddIn Type="Application">
+		<Name>test addin</Name>
+		<Assembly>RevitPlugin\RevitPlugin.dll</Assembly>
+		<AddInId>81194c84-5a2b-4107-9c11-c54018fd7a21</AddInId>
+		<FullClassName>RevitPlugin.App</FullClassName>
+		<VendorId>EMA</VendorId>
+		<VendorDescription>dev</VendorDescription>
+		<VendorEmail>grieger@emaengineer.com</VendorEmail>
+	</AddIn>
+</RevitAddIns>

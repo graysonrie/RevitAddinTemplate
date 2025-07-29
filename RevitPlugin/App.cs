@@ -1,5 +1,7 @@
 ﻿using Autodesk.Revit.UI;
 using RealRevitPlugin.Extensions;
+using RealRevitPlugin;
+using System.Reflection;
 
 namespace RevitPlugin {
     public class App : IExternalApplication {
@@ -8,7 +10,11 @@ namespace RevitPlugin {
         }
 
         public Result OnStartup(UIControlledApplication application) {
+            ResourceAccessor.SetExecutingAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+            // Place your startup logic down here:
+
             CreateRibbon(application);
+
             return Result.Succeeded;
         }
 
